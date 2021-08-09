@@ -5,8 +5,8 @@ namespace App;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\Question;
 
 
 class Questionnaire extends Command
@@ -16,48 +16,37 @@ class Questionnaire extends Command
 
     protected function configure(): void
     {
-
         $this
             ->setName('quest')
-            ->setDescription('Fill out the questionnaire')
-            ->addArgument('name', InputArgument::REQUIRED, 'Enter your name')
-            ->addArgument('age', InputArgument::REQUIRED, 'Enter your age')
-            ->addOption(
-                'gender',
-                null,
-                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                'Your gender',
-                ['M', 'W']
-            )
-        ;
-
+            ->setDescription('Fill out the questionnaire');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $helper = $this->getHelper('question');
 
-//        $io = new SymfonyStyle($input, $output);
-//
-//        do {
-//            $name = $io->ask('Ваше имя');
-//        } while (null === $name);
-//
-//        do {
-//            $age = $io->ask('Ваша фамилия');
-//        } while (null === $age);
+        $questionName = new Question('Ведите ваше имя: ', 'Вася');
 
-//        $io->success(\sprintf('Ваше полное имя: %s %s', $surname, $name));
+        $questionAge = new Question('Ведите ваш возраст: ', '25');
 
-//        return 1;
+        $questionGender = new ChoiceQuestion(
+            'Ваш пол',
+
+            ['М', 'Ж'],
+            0
+        );
+
+        $questionGender->setErrorMessage('Gender %s is invalid.');
+
+        $name = $helper->ask($input, $output, $questionName);
+
+        $age = $helper->ask($input, $output, $questionAge);
+
+        $gender = $helper->ask($input, $output, $questionGender);
 
 
-        $name = $input->getArgument('name');
-        $age = $input->getArgument('age');
-        $gender = $input->getOption('string');
-
-        $output->writeln($name . ' ' . $age . ' ');
+        $output->writeln('Здравствуйте, ' . $name . '. Ваш возраст: ' .  $age . '. Ваш пол: ' . $gender);
 
         return Command::SUCCESS;
-
     }
 }
